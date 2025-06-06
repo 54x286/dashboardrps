@@ -1,160 +1,195 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Analisis Shipper (v2.0)</title>
-    <!--  Chart.js -->
+    <title>Dashboard RPS NCT WISH RESULT</title>
+    <!-- Import Supabase & Chart.js Magic -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            text-align: center;
+            font-family: 'VT323', monospace;
+            background-color: #008080; /* Classic Teal background */
+            background-image: url('https://i.pinimg.com/originals/c8/82/36/c88236248590757597d304936336306e.png');
+            background-repeat: repeat;
+            color: #000;
             padding: 20px;
         }
-        .container {
+        
+        .window {
+            background-color: #c0c0c0; /* The classic grey */
+            border-top: 2px solid #fff;
+            border-left: 2px solid #fff;
+            border-right: 2px solid #000;
+            border-bottom: 2px solid #000;
+            box-shadow: 2px 2px 0px #000;
             max-width: 1000px;
             margin: auto;
         }
+        .title-bar {
+            background: linear-gradient(90deg, #000080, #1084d0); /* Classic blue gradient */
+            color: #fff;
+            padding: 4px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+        }
+        .title-bar-controls { display: flex; }
+        .window-button {
+            width: 22px;
+            height: 22px;
+            background-color: #c0c0c0;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            margin-left: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .content-area {
+            padding: 15px;
+        }
+
         h1 {
-            color: #1DB954; /* Warna ala Spotify */
-            font-weight: 700;
-            margin-bottom: 5px;
+            font-size: 24px;
+            margin: 0;
+            padding-bottom: 10px;
         }
-        p {
-            color: #b3b3b3;
+        p.subtitle {
+            margin-top: 5px;
+            font-size: 18px;
         }
-        /* Kartu Statistik */
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 40px 0;
+            gap: 15px;
+            margin: 20px 0;
         }
         .stat-card {
-            background: #1e1e1e;
-            padding: 25px;
-            border-radius: 12px;
-            border: 1px solid #2e2e2e;
+            border: 2px inset #fff;
+            background: #c0c0c0;
+            padding: 15px;
         }
         .stat-card h3 {
             margin: 0 0 10px;
-            color: #b3b3b3;
-            font-size: 1em;
-            font-weight: 400;
+            font-size: 18px;
+            text-transform: uppercase;
         }
         .stat-card .value {
-            font-size: 2.5em;
-            font-weight: 700;
-            color: #1DB954;
+            font-size: 36px;
         }
-        /* Grid Utama */
+
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 20px;
+            gap: 15px;
         }
         .grid-item {
-            background: #1e1e1e;
-            padding: 25px;
-            border-radius: 12px;
-            border: 1px solid #2e2e2e;
+            border: 2px inset #fff;
+            background: #c0c0c0;
+            padding: 15px;
         }
         h2 {
-            color: #fff;
-            border-bottom: 2px solid #1DB954;
-            padding-bottom: 10px;
             margin-top: 0;
+            font-size: 22px;
             text-align: left;
         }
-        /* Top 3 List */
-        .top3-list { list-style: none; padding: 0; text-align: left; }
+        
+        /* Top Tier List */
+        .top3-list { list-style: none; padding: 0; text-align: left; font-size: 18px; }
         .top3-list li { margin-bottom: 15px; }
-        .top3-list .shipper { font-weight: 600; font-size: 1.1em; color: #fff; }
+        .top3-list .shipper { font-weight: bold; font-size: 20px; }
         .progress-bar {
-            background-color: #333;
-            border-radius: 5px;
-            height: 10px;
+            background-color: #808080;
+            border: 1px inset #fff;
+            height: 12px;
             margin-top: 5px;
-            overflow: hidden;
-        }
-        .progress {
-            background-color: #1DB954;
-            height: 100%;
-            border-radius: 5px;
-            transition: width 0.5s ease-in-out;
-        }
-        .percentage { font-size: 0.9em; color: #b3b3b3; }
-        /* Pie Chart */
-        #pie-chart-container {
-            position: relative;
-            height: 300px;
             width: 100%;
         }
-        /* Media Query untuk Mobile */
+        .progress {
+            background-color: #000080;
+            height: 100%;
+        }
+        .percentage { font-size: 16px; }
+
+        #pie-chart-container {
+            height: 300px;
+            width: 100%;
+            border: 1px inset #fff;
+            padding: 5px;
+        }
         @media (max-width: 768px) {
             .main-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Dashboard Analisis Shipper</h1>
-        <p>Hasil analisis realtime dari seluruh submission.</p>
-
-        <!-- KARTU STATISTIK -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Partisipan</h3>
-                <div class="value" id="total-participants">...</div>
-            </div>
-            <div class="stat-card">
-                <h3>Shipper Teratas</h3>
-                <div class="value" id="top-shipper">...</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Suara</h3>
-                <div class="value" id="total-votes">...</div>
+    <div class="window">
+        <div class="title-bar">
+            <span>☆ Dashboard RPS NCT WISH RESULT</span>
+            <div class="title-bar-controls">
+                <div class="window-button">_</div>
+                <div class="window-button">□</div>
+                <div class="window-button">X</div>
             </div>
         </div>
+        <div class="content-area">
+            <h1>Dashboard RPS NCT WISH RESULT</h1>
+            <p class="subtitle">The numbers are in. Here's the official breakdown.</p>
 
-        <!-- GRID UTAMA -->
-        <div class="main-grid">
-            <!-- TOP 3 PAIRING -->
-            <div class="grid-item">
-                <h2>🏆 Top 3 Jawara</h2>
-                <ul class="top3-list" id="top3-container">
-                    <!-- Data Top 3 akan dimuat di sini -->
-                </ul>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total QRT</h3>
+                    <div class="value" id="total-participants">...</div>
+                </div>
+                <div class="stat-card">
+                    <h3>The Most Voted Ship</h3>
+                    <div class="value" id="top-shipper">...</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Votes</h3>
+                    <div class="value" id="total-votes">...</div>
+                </div>
             </div>
-            <!-- PIE CHART -->
-            <div class="grid-item">
-                <h2>📊 Distribusi Suara</h2>
-                <div id="pie-chart-container">
-                    <canvas id="shipperPieChart"></canvas>
+
+            <div class="main-grid">
+                <div class="grid-item">
+                    <h2>🏆 The Top Tier Ship</h2>
+                    <ul class="top3-list" id="top3-container">
+                        <!-- Top 3 data loads here -->
+                    </ul>
+                </div>
+                <div class="grid-item">
+                    <h2>📊 The Vote Breakdown</h2>
+                    <div id="pie-chart-container">
+                        <canvas id="shipperPieChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-    
-        const SUPABASE_URL = 'https://bjsfuzlsunepfbezniey.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqc2Z1emxzdW5lcGZiZXpuaWV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzYwMzMsImV4cCI6MjA2NDcxMjAzM30.-kjszBCPdEJHiFcFTQqLh0TUgmSj3Jo4oOb0rH336vI';
+        // --- YOUR SUPABASE CONNECTION ---
+        // PENTING! GANTI DENGAN URL DAN KUNCI SUPABASE MILIKMU
+        const SUPABASE_URL = 'URL_SUPABASE_KAMU';
+        const SUPABASE_ANON_KEY = 'ANON_KEY_SUPABASE_KAMU';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function analyzeAndDisplay() {
-            // Ambil data dari Supabase
             let { data: results, error } = await supabase.from('result').select('ranking');
-            if (error) { console.error('Error:', error); return; }
+            if (error) { console.error('Error fetching data:', error); return; }
 
-            // --- FASE 1: Kalkulasi Data ---
             const voteCounts = {};
             let totalVotes = 0;
             results.forEach(submission => {
@@ -168,12 +203,10 @@
             });
             const sortedRankings = Object.entries(voteCounts).sort(([, a], [, b]) => b - a);
 
-            // --- FASE 2: Tampilkan Kartu Statistik ---
             document.getElementById('total-participants').innerText = results.length;
             document.getElementById('total-votes').innerText = totalVotes;
             document.getElementById('top-shipper').innerText = sortedRankings.length > 0 ? sortedRankings[0][0] : '-';
 
-            // --- FASE 3: Tampilkan Top 3 dengan Bar Persentase ---
             const top3Container = document.getElementById('top3-container');
             top3Container.innerHTML = '';
             const top3 = sortedRankings.slice(0, 3);
@@ -182,37 +215,32 @@
                 const listItem = `
                     <li>
                         <div class="shipper">${name}</div>
-                        <div class="percentage">${count} suara (${percentage}%)</div>
-                        <div class="progress-bar">
-                            <div class="progress" style="width: ${percentage}%;"></div>
-                        </div>
+                        <div class="percentage">${count} votes (${percentage}%)</div>
+                        <div class="progress-bar"><div class="progress" style="width: ${percentage}%;"></div></div>
                     </li>
                 `;
                 top3Container.innerHTML += listItem;
             });
 
-            // --- FASE 4: Gambar Pie Chart Cantik ---
             const ctx = document.getElementById('shipperPieChart').getContext('2d');
             const chartLabels = sortedRankings.map(item => item[0]);
             const chartData = sortedRankings.map(item => item[1]);
             
-            if (window.myPieChart) {
-                window.myPieChart.destroy();
-            }
+            if (window.myPieChart) { window.myPieChart.destroy(); }
 
             window.myPieChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: chartLabels,
                     datasets: [{
-                        label: 'Total Suara',
+                        label: 'Total Votes',
                         data: chartData,
-                        backgroundColor: [
-                            '#1DB954', '#1ED760', '#FFC300', '#FF5733', '#C70039', 
-                            '#900C3F', '#581845', '#48C9B0', '#F1C40F', '#E67E22', 
-                            '#E74C3C', '#9B59B6'
+                        backgroundColor: [ // Retro color palette
+                            '#0000AA', '#00AAAA', '#AA00AA', '#00AA00', '#AAAA00', 
+                            '#AA5500', '#A0A0A0', '#5555FF', '#55FFFF', '#FF55FF', 
+                            '#55FF55', '#FFFF55'
                         ],
-                        borderColor: '#1e1e1e',
+                        borderColor: '#c0c0c0',
                         borderWidth: 2
                     }]
                 },
@@ -223,9 +251,13 @@
                         legend: {
                             position: 'right',
                             labels: {
-                                color: '#e0e0e0',
+                                color: '#000',
                                 boxWidth: 15,
-                                padding: 15
+                                padding: 15,
+                                font: {
+                                    family: "'VT323', monospace",
+                                    size: 16
+                                }
                             }
                         }
                     }
