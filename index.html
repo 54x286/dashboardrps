@@ -14,22 +14,22 @@
             font-family: 'VT323', monospace;
             background-color: #008080; /* Classic Teal background */
             color: #000;
-            padding: 10px; /* Reduced padding for mobile */
+            padding: 10px;
             margin: 0;
         }
         
         .window {
-            background-color: #c0c0c0; /* The classic grey */
+            background-color: #c0c0c0;
             border-top: 2px solid #fff;
             border-left: 2px solid #fff;
             border-right: 2px solid #000;
             border-bottom: 2px solid #000;
             box-shadow: 2px 2px 0px #000;
             max-width: 1000px;
-            margin: 10px auto; /* Centered with margin */
+            margin: 10px auto;
         }
         .title-bar {
-            background: linear-gradient(90deg, #000080, #1084d0); /* Classic blue gradient */
+            background: linear-gradient(90deg, #000080, #1084d0);
             color: #fff;
             padding: 4px 5px;
             display: flex;
@@ -57,20 +57,11 @@
         .content-area {
             padding: 15px;
         }
-
-        h1 {
-            font-size: 24px;
-            margin: 0;
-            padding-bottom: 10px;
-        }
-        p.subtitle {
-            margin-top: 5px;
-            font-size: 18px;
-        }
-        
+        h1 { font-size: 24px; margin: 0; padding-bottom: 10px; }
+        p.subtitle { margin-top: 5px; font-size: 18px; }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjusted for better fit */
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             margin: 20px 0;
         }
@@ -79,16 +70,8 @@
             background: #c0c0c0;
             padding: 15px;
         }
-        .stat-card h3 {
-            margin: 0 0 10px;
-            font-size: 18px;
-            text-transform: uppercase;
-        }
-        .stat-card .value {
-            font-size: 36px;
-            word-wrap: break-word; /* Prevents long names from overflowing */
-        }
-
+        .stat-card h3 { margin: 0 0 10px; font-size: 18px; text-transform: uppercase; }
+        .stat-card .value { font-size: 36px; word-wrap: break-word; }
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -99,12 +82,7 @@
             background: #c0c0c0;
             padding: 15px;
         }
-        h2 {
-            margin-top: 0;
-            font-size: 22px;
-            text-align: left;
-        }
-        
+        h2 { margin-top: 0; font-size: 22px; text-align: left; }
         .top3-list { list-style: none; padding: 0; text-align: left; font-size: 18px; }
         .top3-list li { margin-bottom: 15px; }
         .top3-list .shipper { font-weight: bold; font-size: 20px; }
@@ -115,42 +93,24 @@
             margin-top: 5px;
             width: 100%;
         }
-        .progress {
-            background-color: #000080;
-            height: 100%;
-        }
+        .progress { background-color: #000080; height: 100%; }
         .percentage { font-size: 16px; }
-
         #pie-chart-container {
             height: 300px;
             width: 100%;
             border: 1px inset #fff;
             padding: 5px;
+            /* New rule to prevent weird shrinking */
+            min-width: 0; 
         }
         
-        /* --- MOBILE FRIENDLY MAGIC STARTS HERE --- */
         @media (max-width: 768px) {
-            body {
-                padding: 0;
-                background-color: #c0c0c0; /* On mobile, the window content becomes the background */
-            }
-            .window {
-                margin: 0;
-                border: none;
-                box-shadow: none;
-                max-width: 100%;
-            }
-            .content-area {
-                padding: 15px;
-            }
-            .main-grid {
-                grid-template-columns: 1fr; /* Stack the two main sections */
-            }
-            #pie-chart-container {
-                height: 280px; /* Slightly smaller chart on mobile */
-            }
+            body { padding: 0; background-color: #c0c0c0; }
+            .window { margin: 0; border: none; box-shadow: none; max-width: 100%; }
+            .content-area { padding: 15px; }
+            .main-grid { grid-template-columns: 1fr; }
+            #pie-chart-container { height: 280px; }
         }
-        /* --- MOBILE FRIENDLY MAGIC ENDS HERE --- */
     </style>
 </head>
 <body>
@@ -166,42 +126,27 @@
         <div class="content-area">
             <h1>Dashboard RPS NCT WISH RESULT</h1>
             <p class="subtitle">The numbers are in. Here's the official breakdown.</p>
-
             <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total QRT</h3>
-                    <div class="value" id="total-participants">...</div>
-                </div>
-                <div class="stat-card">
-                    <h3>The Most Voted Ship</h3>
-                    <div class="value" id="top-shipper">...</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Total Votes</h3>
-                    <div class="value" id="total-votes">...</div>
-                </div>
+                <div class="stat-card"><h3>Total QRT</h3><div class="value" id="total-participants">...</div></div>
+                <div class="stat-card"><h3>The Most Voted Ship</h3><div class="value" id="top-shipper">...</div></div>
+                <div class="stat-card"><h3>Total Votes</h3><div class="value" id="total-votes">...</div></div>
             </div>
-
             <div class="main-grid">
                 <div class="grid-item">
                     <h2>🏆 The Top Tier Ship</h2>
-                    <ul class="top3-list" id="top3-container">
-                        <!-- Top 3 data loads here -->
-                    </ul>
+                    <ul class="top3-list" id="top3-container"><!-- Top 3 data loads here --></ul>
                 </div>
                 <div class="grid-item">
                     <h2>📊 The Vote Breakdown</h2>
-                    <div id="pie-chart-container">
-                        <canvas id="shipperPieChart"></canvas>
-                    </div>
+                    <div id="pie-chart-container"><canvas id="shipperPieChart"></canvas></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-       
-        const SUPABASE_URL = 'https://bjsfuzlsunepfbezniey.supabase.co';
+        // --- MY SUPABASE CONNECTION ---
+        const SUPABASE_URL = 'https://bjsfuzlsunepfbezniey.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqc2Z1emxzdW5lcGZiZXpuaWV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzYwMzMsImV4cCI6MjA2NDcxMjAzM30.-kjszBCPdEJHiFcFTQqLh0TUgmSj3Jo4oOb0rH336vI';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -232,13 +177,7 @@
             const top3 = sortedRankings.slice(0, 3);
             top3.forEach(([name, count]) => {
                 const percentage = totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : 0;
-                const listItem = `
-                    <li>
-                        <div class="shipper">${name}</div>
-                        <div class="percentage">${count} votes (${percentage}%)</div>
-                        <div class="progress-bar"><div class="progress" style="width: ${percentage}%;"></div></div>
-                    </li>
-                `;
+                const listItem = `<li><div class="shipper">${name}</div><div class="percentage">${count} votes (${percentage}%)</div><div class="progress-bar"><div class="progress" style="width: ${percentage}%;"></div></div></li>`;
                 top3Container.innerHTML += listItem;
             });
 
@@ -255,11 +194,7 @@
                     datasets: [{
                         label: 'Total Votes',
                         data: chartData,
-                        backgroundColor: [ // Retro color palette
-                            '#0000AA', '#00AAAA', '#AA00AA', '#00AA00', '#AAAA00', 
-                            '#AA5500', '#A0A0A0', '#5555FF', '#55FFFF', '#FF55FF', 
-                            '#55FF55', '#FFFF55'
-                        ],
+                        backgroundColor: ['#0000AA', '#00AAAA', '#AA00AA', '#00AA00', '#AAAA00', '#AA5500', '#A0A0A0', '#5555FF', '#55FFFF', '#FF55FF', '#55FF55', '#FFFF55'],
                         borderColor: '#c0c0c0',
                         borderWidth: 2
                     }]
@@ -270,6 +205,10 @@
                     plugins: {
                         legend: {
                             position: 'right',
+                            /* --- FIX STARTS HERE --- */
+                            // This tells the legend to hide if it gets too crowded
+                            display: window.innerWidth > 768, // Only show legend on bigger screens
+                            /* --- FIX ENDS HERE --- */
                             labels: {
                                 color: '#000',
                                 boxWidth: 15,
