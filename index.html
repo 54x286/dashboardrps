@@ -13,10 +13,9 @@
         body {
             font-family: 'VT323', monospace;
             background-color: #008080; /* Classic Teal background */
-            background-image: url('https://i.pinimg.com/originals/c8/82/36/c88236248590757597d304936336306e.png');
-            background-repeat: repeat;
             color: #000;
-            padding: 20px;
+            padding: 10px; /* Reduced padding for mobile */
+            margin: 0;
         }
         
         .window {
@@ -27,7 +26,7 @@
             border-bottom: 2px solid #000;
             box-shadow: 2px 2px 0px #000;
             max-width: 1000px;
-            margin: auto;
+            margin: 10px auto; /* Centered with margin */
         }
         .title-bar {
             background: linear-gradient(90deg, #000080, #1084d0); /* Classic blue gradient */
@@ -37,6 +36,7 @@
             justify-content: space-between;
             align-items: center;
             font-size: 18px;
+            height: 30px;
         }
         .title-bar-controls { display: flex; }
         .window-button {
@@ -70,7 +70,7 @@
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjusted for better fit */
             gap: 15px;
             margin: 20px 0;
         }
@@ -86,6 +86,7 @@
         }
         .stat-card .value {
             font-size: 36px;
+            word-wrap: break-word; /* Prevents long names from overflowing */
         }
 
         .main-grid {
@@ -104,7 +105,6 @@
             text-align: left;
         }
         
-        /* Top Tier List */
         .top3-list { list-style: none; padding: 0; text-align: left; font-size: 18px; }
         .top3-list li { margin-bottom: 15px; }
         .top3-list .shipper { font-weight: bold; font-size: 20px; }
@@ -127,9 +127,30 @@
             border: 1px inset #fff;
             padding: 5px;
         }
+        
+        /* --- MOBILE FRIENDLY MAGIC STARTS HERE --- */
         @media (max-width: 768px) {
-            .main-grid { grid-template-columns: 1fr; }
+            body {
+                padding: 0;
+                background-color: #c0c0c0; /* On mobile, the window content becomes the background */
+            }
+            .window {
+                margin: 0;
+                border: none;
+                box-shadow: none;
+                max-width: 100%;
+            }
+            .content-area {
+                padding: 15px;
+            }
+            .main-grid {
+                grid-template-columns: 1fr; /* Stack the two main sections */
+            }
+            #pie-chart-container {
+                height: 280px; /* Slightly smaller chart on mobile */
+            }
         }
+        /* --- MOBILE FRIENDLY MAGIC ENDS HERE --- */
     </style>
 </head>
 <body>
@@ -137,7 +158,7 @@
         <div class="title-bar">
             <span>☆ Dashboard RPS NCT WISH RESULT</span>
             <div class="title-bar-controls">
-                <div class="window-button">_</div>
+                <div class="window-button">-</div>
                 <div class="window-button">□</div>
                 <div class="window-button">X</div>
             </div>
@@ -179,7 +200,7 @@
     </div>
 
     <script>
-
+       
         const SUPABASE_URL = 'https://bjsfuzlsunepfbezniey.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqc2Z1emxzdW5lcGZiZXpuaWV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzYwMzMsImV4cCI6MjA2NDcxMjAzM30.-kjszBCPdEJHiFcFTQqLh0TUgmSj3Jo4oOb0rH336vI';
 
