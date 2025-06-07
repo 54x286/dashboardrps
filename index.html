@@ -12,8 +12,7 @@
 
         body {
             font-family: 'VT323', monospace;
-            /* --- NEW, STABLE BACKGROUND IMAGE --- */
-            background: #008080 url('https://i.imgur.com/nC4a1t9.png');
+            background-color: #008080; /* Classic Teal background - now 100% reliable */
             color: #000;
             padding: 10px;
             margin: 0;
@@ -28,7 +27,11 @@
             position: absolute;
             cursor: pointer;
         }
-        .desktop-icon img { width: 50px; height: 50px; }
+        /* --- NEW: Using text icons instead of broken images --- */
+        .desktop-icon .icon-graphic {
+            font-size: 48px;
+            line-height: 1;
+        }
         .desktop-icon span { display: block; background: #000080; border: 1px solid #fff; padding: 1px; }
 
         #icon-report { top: 20px; left: 20px; }
@@ -77,21 +80,13 @@
         p.subtitle { margin: 0 0 15px; font-size: 18px; }
         
         .control-panel {
-            border: 2px inset #fff;
-            padding: 10px;
-            margin-bottom: 15px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 15px;
-            font-size: 18px;
+            border: 2px inset #fff; padding: 10px; margin-bottom: 15px;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 15px; font-size: 18px;
         }
         .control-panel label { font-weight: bold; }
-        .control-panel select, .control-panel button {
-            font-family: 'VT323', monospace;
-            font-size: 16px;
-            background-color: #fff;
-            border: 2px outset #c0c0c0;
+        .control-panel select {
+            font-family: 'VT323', monospace; font-size: 16px;
+            background-color: #fff; border: 2px outset #c0c0c0;
         }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 20px 0;}
@@ -129,40 +124,138 @@
 </head>
 <body>
 
-    <!-- Desktop Icons with new, stable image links -->
+    <!-- Desktop Icons with new, stable text icons -->
     <div class="desktop-icon" id="icon-report" onclick="openWindow('dashboard-window')">
-        <img src="https://i.imgur.com/xTafj2s.png" alt="Report Icon">
+        <div class="icon-graphic">📈</div>
         <span>Shipper Report</span>
     </div>
     <div class="desktop-icon" id="icon-readme" onclick="openWindow('readme-window')">
-        <img src="https://i.imgur.com/kY81E2R.png" alt="Readme Icon">
+        <div class="icon-graphic">📄</div>
         <span>README.TXT</span>
     </div>
 
-    <!-- Main Dashboard Window -->
     <div class="window" id="dashboard-window">
-        <!-- ... (rest of the window HTML is unchanged) ... -->
+        <div class="title-bar"><span>☆ Dashboard RPS NCT WISH RESULT</span><div class="title-bar-controls"><div class="window-button">-</div><div class="window-button">□</div><div class="window-button">X</div></div></div>
+        <div class="content-area">
+            <h1>Dashboard RPS NCT WISH RESULT</h1>
+            <p class="subtitle">The numbers are in. Here's the official breakdown.</p>
+            <div class="control-panel"><label for="calcMode">View Mode:</label><select id="calcMode"><option value="overall">Overall Mentions</option><option value="top1">#1 Pick Only</option></select><label for="topX">Show:</label><select id="topX"><option value="3">Top 3</option><option value="5">Top 5</option><option value="10">Top 10</option></select></div>
+            <div class="stats-grid"><div class="stat-card"><h3>Total QRT</h3><div class="value" id="total-participants">...</div></div><div class="stat-card"><h3>The Most Voted Ship</h3><div class="value" id="top-shipper">...</div></div><div class="stat-card"><h3>Total Votes</h3><div class="value" id="total-votes">...</div></div></div>
+            <div class="main-grid"><div class="grid-item"><h2 id="top-tier-title">🏆 The Top Tier Ship</h2><ul class="top3-list" id="top-tier-container"></ul></div><div class="grid-item"><h2>📊 The Vote Breakdown</h2><div id="pie-chart-container"><canvas id="shipperPieChart"></canvas></div></div></div>
+        </div>
     </div>
     
-    <!-- README Window -->
-    <div class="window" id="readme-window">
-        <!-- ... (rest of the window HTML is unchanged) ... -->
-    </div>
+    <div class="window" id="readme-window"><div class="title-bar"><span>README.TXT</span><div class="title-bar-controls"><div class="window-button" onclick="closeWindow('readme-window')">X</div></div></div><div class="content-area"><p>Welcome to the Shipper-Verse Analysis!</p><p><strong>How to read this:</strong></p><p><strong>- Overall Mentions:</strong> Counts every time a ship appears in anyone's Top 12 list.</p><p><strong>- #1 Pick Only:</strong> Only counts ships that were ranked as #1.</p><p>Click on a slice in the pie chart for a detailed Shipper Spotlight!</p><p>Made with love & data.</p></div></div>
     
-    <!-- Spotlight Window -->
-    <div class="window" id="spotlight-window">
-        <!-- ... (rest of the window HTML is unchanged) ... -->
-    </div>
-
+    <div class="window" id="spotlight-window"><div class="title-bar"><span id="spotlight-title">Shipper Spotlight</span><div class="title-bar-controls"><div class="window-button" onclick="closeWindow('spotlight-window')">X</div></div></div><div class="content-area" id="spotlight-content"></div></div>
 
     <script>
-        // --- MY SUPABASE CONNECTION ---
-        // 
-        const SUPABASE_URL = 'https://bjsfuzlsunepfbezniey.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqc2Z1emxzdW5lcGZiZXpuaWV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzYwMzMsImV4cCI6MjA2NDcxMjAzM30.-kjszBCPdEJHiFcFTQqLh0TUgmSj3Jo4oOb0rH336vI'; 
+        // --- YOUR SUPABASE CONNECTION IS ALREADY FILLED IN! ---
+        // I have used the keys you provided. Do not change these.
+        const SUPABASE_URL = 'https://bjsfuzlsunepfbezniey.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqc2Z1emxzdW5lcGZiZXpuaWV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzYwMzMsImV4cCI6MjA2NDcxMjAzM30.-kjszBCPdEJHiFcFTQqLh0TUgmSj3Jo4oOb0rH336vI';
 
-        // (The rest of the JavaScript code is exactly the same, no changes needed here)
-        // ...
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let fullData = [];
+
+        const calcModeSelect = document.getElementById('calcMode');
+        const topXSelect = document.getElementById('topX');
+        
+        calcModeSelect.addEventListener('change', analyzeAndDisplay);
+        topXSelect.addEventListener('change', analyzeAndDisplay);
+
+        async function fetchData() {
+            let { data, error } = await supabase.from('result').select('username, top_choice, ranking');
+            if (error) { console.error('Error fetching data:', error); return; }
+            fullData = data;
+            analyzeAndDisplay();
+        }
+
+        function analyzeAndDisplay() {
+            if (fullData.length === 0) return;
+            const mode = calcModeSelect.value;
+            const topX = parseInt(topXSelect.value, 10);
+            const voteCounts = {};
+            let totalVotes = 0;
+            if (mode === 'overall') {
+                fullData.forEach(submission => {
+                    if (submission.ranking && Array.isArray(submission.ranking)) {
+                        submission.ranking.forEach(shipper => {
+                            const shipperName = shipper.name;
+                            voteCounts[shipperName] = (voteCounts[shipperName] || 0) + 1;
+                        });
+                    }
+                });
+                totalVotes = Object.values(voteCounts).reduce((sum, count) => sum + count, 0);
+            } else { // mode === 'top1'
+                fullData.forEach(submission => {
+                    if (submission.top_choice) {
+                        voteCounts[submission.top_choice] = (voteCounts[submission.top_choice] || 0) + 1;
+                    }
+                });
+                totalVotes = fullData.length;
+            }
+            const sortedRankings = Object.entries(voteCounts).sort(([, a], [, b]) => b - a);
+            document.getElementById('total-participants').innerText = fullData.length;
+            document.getElementById('total-votes').innerText = totalVotes;
+            document.getElementById('top-shipper').innerText = sortedRankings.length > 0 ? sortedRankings[0][0] : '-';
+            const topTierContainer = document.getElementById('top-tier-container');
+            topTierContainer.innerHTML = '';
+            const topN = sortedRankings.slice(0, topX);
+            document.getElementById('top-tier-title').innerText = `🏆 The Top Tier Ship (Top ${topX})`;
+            topN.forEach(([name, count]) => {
+                const percentage = totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : 0;
+                topTierContainer.innerHTML += `<li><div class="shipper">${name}</div><div class="percentage">${count} votes (${percentage}%)</div><div class="progress-bar"><div class="progress" style="width: ${percentage}%;"></div></div></li>`;
+            });
+            drawPieChart(sortedRankings);
+        }
+
+        function drawPieChart(sortedRankings) {
+            const ctx = document.getElementById('shipperPieChart').getContext('2d');
+            const chartLabels = sortedRankings.map(item => item[0]);
+            const chartData = sortedRankings.map(item => item[1]);
+            if (window.myPieChart) { window.myPieChart.destroy(); }
+            window.myPieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{ label: 'Total Votes', data: chartData, backgroundColor: ['#0000AA', '#00AAAA', '#AA00AA', '#00AA00', '#AAAA00', '#AA5500', '#A0A0A0', '#5555FF', '#55FFFF', '#FF55FF', '#55FF55', '#FFFF55'], borderColor: '#c0c0c0', borderWidth: 2 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const clickedIndex = elements[0].index;
+                            const clickedShipper = chartLabels[clickedIndex];
+                            showSpotlight(clickedShipper);
+                        }
+                    },
+                    plugins: { legend: { position: 'bottom', labels: { color: '#000', boxWidth: 15, padding: 10, font: { family: "'VT323', monospace", size: 14 }}}}
+                }
+            });
+        }
+
+        function showSpotlight(shipperName) {
+            const voteCounts = {};
+             fullData.forEach(submission => {
+                if (submission.ranking && Array.isArray(submission.ranking)) {
+                    submission.ranking.forEach(shipper => {
+                        voteCounts[shipper.name] = (voteCounts[shipper.name] || 0) + 1;
+                    });
+                }
+            });
+            const top1Votes = fullData.filter(d => d.top_choice === shipperName).length;
+            const supporters = fullData.filter(d => d.ranking && d.ranking.some(r => r.name === shipperName)).map(d => d.username).slice(0, 5);
+            document.getElementById('spotlight-title').innerText = `Spotlight: ${shipperName}`;
+            const contentEl = document.getElementById('spotlight-content');
+            contentEl.innerHTML = `<h2>${shipperName}</h2><ul><li>Voted #1 by: <strong>${top1Votes}</strong> players</li><li>Supported by: <strong>${supporters.join(', ')}${supporters.length < voteCounts[shipperName] ? ', ...' : ''}</strong></li></ul>`;
+            openWindow('spotlight-window');
+        }
+        
+        function openWindow(id) { document.getElementById(id).style.display = 'block'; }
+        function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
+        
+        fetchData();
     </script>
 </body>
 </html>
