@@ -12,7 +12,7 @@
 
         body {
             font-family: 'VT323', monospace;
-            background-color: #008080; /* Classic Teal background - now 100% reliable */
+            background: #008080; /* Classic Teal background */
             color: #000;
             padding: 10px;
             margin: 0;
@@ -26,8 +26,8 @@
             margin: 10px;
             position: absolute;
             cursor: pointer;
+            user-select: none;
         }
-        /* --- NEW: Using text icons instead of broken images --- */
         .desktop-icon .icon-graphic {
             font-size: 48px;
             line-height: 1;
@@ -135,7 +135,7 @@
     </div>
 
     <div class="window" id="dashboard-window">
-        <div class="title-bar"><span>☆ Dashboard RPS NCT WISH RESULT</span><div class="title-bar-controls"><div class="window-button">-</div><div class="window-button">□</div><div class="window-button">X</div></div></div>
+        <div class="title-bar" onmousedown="dragStart(event, 'dashboard-window')"><span>☆ Dashboard RPS NCT WISH RESULT</span><div class="title-bar-controls"><div class="window-button">-</div><div class="window-button">□</div><div class="window-button">X</div></div></div>
         <div class="content-area">
             <h1>Dashboard RPS NCT WISH RESULT</h1>
             <p class="subtitle">The numbers are in. Here's the official breakdown.</p>
@@ -145,13 +145,12 @@
         </div>
     </div>
     
-    <div class="window" id="readme-window"><div class="title-bar"><span>README.TXT</span><div class="title-bar-controls"><div class="window-button" onclick="closeWindow('readme-window')">X</div></div></div><div class="content-area"><p>Welcome to the Shipper-Verse Analysis!</p><p><strong>How to read this:</strong></p><p><strong>- Overall Mentions:</strong> Counts every time a ship appears in anyone's Top 12 list.</p><p><strong>- #1 Pick Only:</strong> Only counts ships that were ranked as #1.</p><p>Click on a slice in the pie chart for a detailed Shipper Spotlight!</p><p>Made with love & data.</p></div></div>
+    <div class="window" id="readme-window"><div class="title-bar" onmousedown="dragStart(event, 'readme-window')"><span>README.TXT</span><div class="title-bar-controls"><div class="window-button" onclick="closeWindow('readme-window')">X</div></div></div><div class="content-area"><p>Welcome to the Shipper-Verse Analysis!</p><p><strong>How to read this:</strong></p><p><strong>- Overall Mentions:</strong> Counts every time a ship appears in anyone's Top 12 list.</p><p><strong>- #1 Pick Only:</strong> Only counts ships that were ranked as #1.</p><p>Click on a slice in the pie chart for a detailed Shipper Spotlight!</p><p>Made with love & data.</p></div></div>
     
-    <div class="window" id="spotlight-window"><div class="title-bar"><span id="spotlight-title">Shipper Spotlight</span><div class="title-bar-controls"><div class="window-button" onclick="closeWindow('spotlight-window')">X</div></div></div><div class="content-area" id="spotlight-content"></div></div>
+    <div class="window" id="spotlight-window"><div class="title-bar" onmousedown="dragStart(event, 'spotlight-window')"><span id="spotlight-title">Shipper Spotlight</span><div class="title-bar-controls"><div class="window-button" onclick="closeWindow('spotlight-window')">X</div></div></div><div class="content-area" id="spotlight-content"></div></div>
 
     <script>
-        // --- YOUR SUPABASE CONNECTION IS ALREADY FILLED IN! ---
-        // I have used the keys you provided. Do not change these.
+        // --- SUPERBASE ---
         const SUPABASE_URL = 'https://bjsfuzlsunepfbezniey.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqc2Z1emxzdW5lcGZiZXpuaWV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzYwMzMsImV4cCI6MjA2NDcxMjAzM30.-kjszBCPdEJHiFcFTQqLh0TUgmSj3Jo4oOb0rH336vI';
 
@@ -166,7 +165,11 @@
 
         async function fetchData() {
             let { data, error } = await supabase.from('result').select('username, top_choice, ranking');
-            if (error) { console.error('Error fetching data:', error); return; }
+            if (error) {
+                console.error('Error fetching data:', error.message);
+                document.body.innerHTML = `<div style="font-size: 24px; color: red; padding: 50px; background: #c0c0c0; border: 2px solid #000;">ERROR: Could not connect to the database.<br><br>Please check:<br>1. Supabase URL and Key are correct.<br>2. RLS Policy for 'SELECT' is enabled for everyone.</div>`;
+                return;
+            }
             fullData = data;
             analyzeAndDisplay();
         }
@@ -176,37 +179,38 @@
             const mode = calcModeSelect.value;
             const topX = parseInt(topXSelect.value, 10);
             const voteCounts = {};
-            let totalVotes = 0;
             if (mode === 'overall') {
                 fullData.forEach(submission => {
                     if (submission.ranking && Array.isArray(submission.ranking)) {
                         submission.ranking.forEach(shipper => {
-                            const shipperName = shipper.name;
-                            voteCounts[shipperName] = (voteCounts[shipperName] || 0) + 1;
+                            voteCounts[shipper.name] = (voteCounts[shipper.name] || 0) + 1;
                         });
                     }
                 });
-                totalVotes = Object.values(voteCounts).reduce((sum, count) => sum + count, 0);
             } else { // mode === 'top1'
                 fullData.forEach(submission => {
                     if (submission.top_choice) {
                         voteCounts[submission.top_choice] = (voteCounts[submission.top_choice] || 0) + 1;
                     }
                 });
-                totalVotes = fullData.length;
             }
+            const totalVotes = Object.values(voteCounts).reduce((sum, count) => sum + count, 0);
             const sortedRankings = Object.entries(voteCounts).sort(([, a], [, b]) => b - a);
+
             document.getElementById('total-participants').innerText = fullData.length;
             document.getElementById('total-votes').innerText = totalVotes;
             document.getElementById('top-shipper').innerText = sortedRankings.length > 0 ? sortedRankings[0][0] : '-';
+            
             const topTierContainer = document.getElementById('top-tier-container');
             topTierContainer.innerHTML = '';
             const topN = sortedRankings.slice(0, topX);
             document.getElementById('top-tier-title').innerText = `🏆 The Top Tier Ship (Top ${topX})`;
+            
             topN.forEach(([name, count]) => {
                 const percentage = totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : 0;
                 topTierContainer.innerHTML += `<li><div class="shipper">${name}</div><div class="percentage">${count} votes (${percentage}%)</div><div class="progress-bar"><div class="progress" style="width: ${percentage}%;"></div></div></li>`;
             });
+
             drawPieChart(sortedRankings);
         }
 
@@ -239,22 +243,37 @@
             const voteCounts = {};
              fullData.forEach(submission => {
                 if (submission.ranking && Array.isArray(submission.ranking)) {
-                    submission.ranking.forEach(shipper => {
-                        voteCounts[shipper.name] = (voteCounts[shipper.name] || 0) + 1;
-                    });
+                    submission.ranking.forEach(shipper => { voteCounts[shipper.name] = (voteCounts[shipper.name] || 0) + 1; });
                 }
             });
             const top1Votes = fullData.filter(d => d.top_choice === shipperName).length;
             const supporters = fullData.filter(d => d.ranking && d.ranking.some(r => r.name === shipperName)).map(d => d.username).slice(0, 5);
             document.getElementById('spotlight-title').innerText = `Spotlight: ${shipperName}`;
             const contentEl = document.getElementById('spotlight-content');
-            contentEl.innerHTML = `<h2>${shipperName}</h2><ul><li>Voted #1 by: <strong>${top1Votes}</strong> players</li><li>Supported by: <strong>${supporters.join(', ')}${supporters.length < voteCounts[shipperName] ? ', ...' : ''}</strong></li></ul>`;
+            contentEl.innerHTML = `<h2>${shipperName}</h2><ul><li>Voted #1 by: <strong>${top1Votes}</strong> players</li><li>Supported by: <strong>${supporters.join(', ')}${supporters.length < (voteCounts[shipperName] || 0) ? ', ...' : ''}</strong></li></ul>`;
             openWindow('spotlight-window');
         }
         
+        // Window Management
         function openWindow(id) { document.getElementById(id).style.display = 'block'; }
         function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
         
+        let dragTarget = null; let offsetX, offsetY;
+        function dragStart(e, id) {
+            dragTarget = document.getElementById(id);
+            offsetX = e.clientX - dragTarget.offsetLeft;
+            offsetY = e.clientY - dragTarget.offsetTop;
+            document.onmousemove = drag;
+            document.onmouseup = dragEnd;
+        }
+        function drag(e) {
+            if (dragTarget) {
+                dragTarget.style.left = (e.clientX - offsetX) + 'px';
+                dragTarget.style.top = (e.clientY - offsetY) + 'px';
+            }
+        }
+        function dragEnd() { dragTarget = null; document.onmousemove = null; document.onmouseup = null; }
+
         fetchData();
     </script>
 </body>
